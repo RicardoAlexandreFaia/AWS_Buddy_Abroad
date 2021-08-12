@@ -9,7 +9,6 @@ from django.db import models
 
 
 class BuddyInfo(models.Model):
-    id = models.OneToOneField('Users', models.DO_NOTHING, db_column='id', primary_key=True)
     name = models.CharField(max_length=100)
     earnings = models.FloatField(blank=True, null=True)
 
@@ -111,7 +110,6 @@ class TuristInfo(models.Model):
 class Users(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True)
     image = models.CharField(max_length=200, blank=True, null=True)
-    user_id = models.IntegerField(unique=True)
     description = models.CharField(max_length=100)
     age = models.IntegerField()
 
