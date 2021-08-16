@@ -8,6 +8,7 @@ environs = {version = "==8.0.0", extras = ["django"]}
 mysqlclient = "*"
 django = "*"
 djangorestframework = "*"
+boto3 = "*"
 
 [dev-packages]
 
