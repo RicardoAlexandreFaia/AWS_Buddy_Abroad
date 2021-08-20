@@ -9,6 +9,7 @@ mysqlclient = "*"
 django = "*"
 djangorestframework = "*"
 boto3 = "*"
+drf-yasg = "*"
 
 [dev-packages]
 
