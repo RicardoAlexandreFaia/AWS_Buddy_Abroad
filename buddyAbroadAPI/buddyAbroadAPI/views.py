@@ -121,6 +121,7 @@ class Users(generics.ListCreateAPIView):
     ))
     @api_view(['POST'])
     def login_auth(request):
+        boto3.setup_default_session(region_name='eu-west-2')
         client = boto3.client('cognito-idp')
         try:
             response = client.initiate_auth(
@@ -153,7 +154,7 @@ class TripsAPI(generics.ListCreateAPIView):
     @api_view(['GET'])
     def get(request):
         trips = Trips.objects.all()
-        #boto3.setup_default_session(region_name='eu-west-2')
+        boto3.setup_default_session(region_name='eu-west-2')
         client = boto3.client('s3')
         for trip in trips:
             try:
