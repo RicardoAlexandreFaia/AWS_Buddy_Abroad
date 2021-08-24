@@ -48,7 +48,7 @@ class Users(generics.ListCreateAPIView):
 
         if user.is_valid():
             user.save() # Save User on DataBase
-            boto3.setup_default_session(region_name='us-east-2')
+            boto3.setup_default_session(region_name='eu-west-2')
             client = boto3.client('cognito-idp')
             try:
                 response = client.sign_up(
@@ -93,7 +93,7 @@ class Users(generics.ListCreateAPIView):
     ))
     @api_view(['POST'])
     def confirm_sign_up(request):
-        boto3.setup_default_session(region_name='us-east-2')
+        boto3.setup_default_session(region_name='eu-west-2')
         client = boto3.client('cognito-idp')
         try:
             response = client.confirm_sign_up(
@@ -123,16 +123,16 @@ class Users(generics.ListCreateAPIView):
     ))
     @api_view(['POST'])
     def login_auth(request):
-        boto3.setup_default_session(region_name='us-east-2')
+        boto3.setup_default_session(region_name='eu-west-2')
         client = boto3.client('cognito-idp')
         try:
             response = client.initiate_auth(
+                ClientId=env.str('AWS_CLIENT_ID'),
                 AuthFlow='USER_PASSWORD_AUTH',
                 AuthParameters={
                     'USERNAME': request.data['email'],
                     'PASSWORD': request.data['password']
                 },
-                ClientId=env.str('AWS_CLIENT_ID'),
             )
             return Response({
                 'MSG': 'User Confirmed',
