@@ -156,18 +156,6 @@ class TripsAPI(generics.ListCreateAPIView):
     @api_view(['GET'])
     def get(request):
         trips = Trips.objects.all()
-        boto3.setup_default_session(region_name='us-east-2')
-        client = boto3.client('s3')
-        for trip in trips:
-            try:
-                response = client.generate_presigned_url(ClientMethod='get_object',
-                                                            Params={'Bucket' : 'buddy-abroad',
-                                                                    'Key':'' + trip.principal_image},
-                                                            ExpiresIn=3200)
-                trip.principal_image = response
-            except ClientError as e:
-                return Response(e)
-
         trips_serializer = TripsSerializers(trips,many=True)
         return Response(trips_serializer.data)
 
