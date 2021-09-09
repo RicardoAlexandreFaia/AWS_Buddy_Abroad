@@ -181,8 +181,7 @@ class Trips(models.Model):
     status = models.CharField(max_length=100, blank=True, null=True)
     description = models.CharField(max_length=100, blank=True, null=True)
     price = models.FloatField(blank=True, null=True)
-    trips_details = models.ForeignKey('TripsDetails', models.DO_NOTHING)
-    users = models.ForeignKey('Users', models.DO_NOTHING)
+    users = models.ForeignKey('Users', models.DO_NOTHING, db_column='users_id')
 
     class Meta:
         managed = False
@@ -190,9 +189,10 @@ class Trips(models.Model):
 
 
 class TripsDetails(models.Model):
-    duration = models.CharField(max_length=45, blank=True, null=True)
-    group_size = models.CharField(max_length=45, blank=True, null=True)
-    location = models.CharField(max_length=45, blank=True, null=True)
+    duration = models.IntegerField(blank=True, null=True, db_column='duration')
+    group_size = models.IntegerField(blank=True, null=True, db_column='group_size')
+    location = models.CharField(max_length=100, blank=True, null=True, db_column='location')
+    trip_name = models.ForeignKey('Trips', models.DO_NOTHING, db_column='trip_name')
 
     class Meta:
         managed = False
@@ -218,8 +218,8 @@ class TuristInfo(models.Model):
 
 
 class Users(models.Model):
-    name = models.CharField(max_length=100, blank=True, null=True)
-    image = models.CharField(max_length=200, blank=True, null=True)
+    name = models.IntegerField(blank=True, null=True)
+    image = models.IntegerField(blank=True, null=True)
     description = models.CharField(max_length=100)
     age = models.IntegerField(blank=True, null=True)
 
