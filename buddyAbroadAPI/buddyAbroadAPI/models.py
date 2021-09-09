@@ -192,7 +192,7 @@ class TripsDetails(models.Model):
     duration = models.IntegerField(blank=True, null=True, db_column='duration')
     group_size = models.IntegerField(blank=True, null=True, db_column='group_size')
     location = models.CharField(max_length=100, blank=True, null=True, db_column='location')
-    trip_name = models.ForeignKey('Trips', models.DO_NOTHING, db_column='trip_name')
+    trip_id = models.ForeignKey('Trips', models.DO_NOTHING, db_column='trip_id')
 
     class Meta:
         managed = False
@@ -218,8 +218,8 @@ class TuristInfo(models.Model):
 
 
 class Users(models.Model):
-    name = models.IntegerField(blank=True, null=True)
-    image = models.IntegerField(blank=True, null=True)
+    name = models.TextField(blank=True, null=True)
+    image = models.TextField(blank=True, null=True)
     description = models.CharField(max_length=100)
     age = models.IntegerField(blank=True, null=True)
 
