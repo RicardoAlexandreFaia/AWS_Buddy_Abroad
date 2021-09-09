@@ -1,7 +1,9 @@
 from botocore.exceptions import ClientError
+from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
+from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -16,7 +18,7 @@ from drf_yasg.utils import swagger_auto_schema
 env = Env()
 env.read_env()
 
-from buddyAbroadAPI.models import *
+from .models import *
 
 
 class Users(generics.ListCreateAPIView):
@@ -156,9 +158,63 @@ class TripsAPI(generics.ListCreateAPIView):
     @api_view(['GET'])
     def get(request):
         trips = Trips.objects.all()
+        boto3.setup_default_session(region_name='eu-west-2')
+        client = boto3.client('s3')
+        for trip in trips:
+            try:
+                response = client.generate_presigned_url(ClientMethod='get_object',
+                                                            Params={'Bucket' : 'buddy-abroad',
+                                                                    'Key':'' + trip.principal_image},
+                                                            ExpiresIn=3600)
+                trip.principal_image = response
+            except ClientError as e:
+                return Response(e)
         trips_serializer = TripsSerializers(trips,many=True)
         return Response(trips_serializer.data)
 
+    @api_view(['GET'])
+    def get_trip_by_id(request,id):
+        if id:
+            trips = Trips.objects.all().filter(pk=id)
+            if len(trips) > 0:
+                trips_serializer = TripsSerializers(trips, many=True)
+                return Response(trips_serializer.data)
+            else:
+                return Response({
+                    'msg':'Empty Set!'
+                })
+        else:
+            return Response({
+                'msg':'Error:Must provide a valid id!'
+            })
+
+    @api_view(['POST'])
+    def postTrip(request):
+        if request.method == 'POST':
+            data = JSONParser().parse(request)
+            trip_serializer = TripsSerializers(data=data)
+
+            if trip_serializer.is_valid():
+                trip_item_object = trip_serializer.save()
+                return JsonResponse(trip_serializer.data, status=status.HTTP_201_CREATED)
+
+            return JsonResponse(trip_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return JsonResponse("Bad Request", status=status.HTTP_400_BAD_REQUEST)
+
+    @api_view(['POST'])
+    def postTripDetails(request):
+        if request.method == 'POST':
+            data = JSONParser().parse(request)
+            trip_details_serializer = TripsDetailsSerializer(data=data)
+
+            if trip_details_serializer.is_valid():
+                trip_details_item_object = trip_details_serializer.save()
+                return JsonResponse(trip_details_serializer.data, status=status.HTTP_201_CREATED)
+
+            return JsonResponse(trip_details_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return JsonResponse("Bad Request", status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
