@@ -175,7 +175,6 @@ class Roles(models.Model):
 
 
 class Trips(models.Model):
-    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100, blank=True, null=True)
     rating = models.IntegerField(blank=True, null=True)
     principal_image = models.CharField(max_length=322, blank=True, null=True)
@@ -190,7 +189,6 @@ class Trips(models.Model):
 
 
 class TripsDetails(models.Model):
-    id = models.IntegerField(primary_key=True)
     duration = models.IntegerField(blank=True, null=True, db_column='duration')
     group_size = models.IntegerField(blank=True, null=True, db_column='group_size')
     location = models.CharField(max_length=100, blank=True, null=True, db_column='location')
