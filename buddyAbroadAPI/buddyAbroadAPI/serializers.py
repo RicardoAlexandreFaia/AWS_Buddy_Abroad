@@ -16,14 +16,9 @@ class UserSerializer(serializers.ModelSerializer):
 class TripsSerializers(serializers.ModelSerializer):
     class Meta:
         model = Trips
-        fields = ('name',
-                  'rating',
-                  'principal_image',
-                  'description',
-                  'price',
-                  'users')
+        fields = ('__all__')
 
 class TripsDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TripsDetails
-        fields = '__all__'
+        fields = ('__all__')
