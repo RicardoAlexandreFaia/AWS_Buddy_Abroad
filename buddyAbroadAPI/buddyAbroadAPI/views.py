@@ -225,5 +225,7 @@ def api_root(request, format=None):
         'Confirm Account': reverse('confirm_sign_up', request=request, format=format),
         'Login': reverse('loginAuth', request=request, format=format),
         'documentation':reverse('schema-swagger-ui',request=request,format=format),
-        'trips' : reverse('trips',request=request, format=format)
+        'trips' : reverse('trips',request=request, format=format),
+        'postTrips':reverse('post_trips',request=request,format=format),
+        'postTripsDetails': reverse('post_trips_details', request=request, format=format),
     })
