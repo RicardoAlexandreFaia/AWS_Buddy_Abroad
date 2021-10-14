@@ -20,7 +20,6 @@ env.read_env()
 
 from .models import *
 
-
 class Users(generics.ListCreateAPIView):
     queryset = Users.objects.all()
     serializer_class = UserSerializer
@@ -147,7 +146,34 @@ class Users(generics.ListCreateAPIView):
         except client.exceptions.NotAuthorizedException:
             return Response('Error: Incorrect username or password!')
 
-class TripsAPI(generics.ListCreateAPIView):
+class Trips_API(generics.ListCreateAPIView):
+    queryset = Trips.objects.all()
+    serializer_class = TripSerializer
+
+    @api_view(['GET'])
+    def get_location(request,location):
+        if location:
+            trips = Trips.objects.all().filter(location=location)
+            trips_ser = TripSerializer(trips,many=True)
+            if len(trips_ser.data) > 0:
+                return Response(trips_ser.data)
+            else:
+                return Response('No Trips !!')
+        return Response('')
+
+class User_Tour_API(generics.ListCreateAPIView):
+    queryset = UserTrips.objects.all()
+    serializer_class = UserTourSerializer
+
+    @api_view(['GET'])
+    def user_tour_id(request,id):
+        if id:
+            user_tour = UserTrips.objects.all().filter(id=id)
+            user_tour_ser = UserTourSerializer(user_tour,many=True)
+            return Response(user_tour_ser.data)
+        return Response('')
+
+'''class TripsAPI(generics.ListCreateAPIView):
 
 
     test_param = openapi.Parameter('test', openapi.IN_QUERY, description="test manual param", type=openapi.TYPE_BOOLEAN)
@@ -214,8 +240,7 @@ class TripsAPI(generics.ListCreateAPIView):
 
             return JsonResponse(trip_details_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return JsonResponse("Bad Request", status=status.HTTP_400_BAD_REQUEST)
-
+            return JsonResponse("Bad Request", status=status.HTTP_400_BAD_REQUEST)'''
 
 @api_view(['GET'])
 def api_root(request, format=None):
@@ -225,7 +250,6 @@ def api_root(request, format=None):
         'Confirm Account': reverse('confirm_sign_up', request=request, format=format),
         'Login': reverse('loginAuth', request=request, format=format),
         'documentation':reverse('schema-swagger-ui',request=request,format=format),
-        'trips' : reverse('trips',request=request, format=format),
-        'postTrips':reverse('post_trips',request=request,format=format),
-        'postTripsDetails': reverse('post_trips_details', request=request, format=format),
+        'trips':reverse('trips',request=request,format=format),
+        'user_trips':reverse('user_trips',request=request,format=format)
     })
