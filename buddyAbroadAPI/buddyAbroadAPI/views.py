@@ -146,101 +146,104 @@ class Users(generics.ListCreateAPIView):
         except client.exceptions.NotAuthorizedException:
             return Response('Error: Incorrect username or password!')
 
-class Trips_API(generics.ListCreateAPIView):
+class Trips_API(APIView):
+    '''
+    Trips API Functions
+    '''
     queryset = Trips.objects.all()
     serializer_class = TripSerializer
 
     @api_view(['GET'])
-    def get_location(request,location):
-        if location:
-            trips = Trips.objects.all().filter(location=location)
-            trips_ser = TripSerializer(trips,many=True)
-            if len(trips_ser.data) > 0:
-                return Response(trips_ser.data)
-            else:
-                return Response('No Trips !!')
-        return Response('')
+    def get_trip(request,lctn):
+        trips = Trips.objects.get(location=lctn)
+        trips_srlz = TripSerializer(trips)
+        if len(trips_srlz)>0:
+            return JsonResponse(trips_srlz.data, safe=False)
+        return Response({'msg:No Data!'})
 
-class User_Tour_API(generics.ListCreateAPIView):
-    queryset = UserTrips.objects.all()
-    serializer_class = UserTourSerializer
-
-    @api_view(['GET'])
-    def user_tour_id(request,id):
-        if id:
-            user_tour = UserTrips.objects.all().filter(id=id)
-            user_tour_ser = UserTourSerializer(user_tour,many=True)
-            return Response(user_tour_ser.data)
-        return Response('')
-
-'''class TripsAPI(generics.ListCreateAPIView):
-
-
-    test_param = openapi.Parameter('test', openapi.IN_QUERY, description="test manual param", type=openapi.TYPE_BOOLEAN)
-    trips_response = openapi.Response('response description', TripsSerializers)
-    @swagger_auto_schema(method='get',
-                         manual_parameters=[test_param],
-                         responses={200: trips_response})
-    @api_view(['GET'])
-    def get(request):
-        trips = Trips.objects.all()
-        boto3.setup_default_session(region_name='eu-west-2')
-        client = boto3.client('s3')
-        for trip in trips:
-            try:
-                response = client.generate_presigned_url(ClientMethod='get_object',
-                                                            Params={'Bucket' : 'buddy-abroad',
-                                                                    'Key':'' + trip.principal_image},
-                                                            ExpiresIn=3600)
-                trip.principal_image = response
-            except ClientError as e:
-                return Response(e)
-        trips_serializer = TripsSerializers(trips,many=True)
-        return Response(trips_serializer.data)
-
-    @api_view(['GET'])
-    def get_trip_by_id(request,id):
-        if id:
-            trips = Trips.objects.all().filter(pk=id)
-            if len(trips) > 0:
-                trips_serializer = TripsSerializers(trips, many=True)
-                return Response(trips_serializer.data)
-            else:
-                return Response({
-                    'msg':'Empty Set!'
-                })
-        else:
+    @api_view(['PUT','DELETE'])
+    def update_delete_trip(request,id):
+        trip_data = JSONParser().parse(request)
+        trip = Trips.objects.get(id=id)
+        # Check HTTP Request
+        if request.method == 'PUT':
+            if id:
+                trip_srlz = TripSerializer(trip, data=trip_data)
+                if trip_srlz.is_valid():
+                    trip_srlz.save()
+                    return Response({
+                        'msg' : 'Trip Updated!',
+                        'data': trip_srlz.data
+                    })
+            return Response(trip_srlz.errors,status=status.HTTP_400_BAD_REQUEST)
+        elif request.method=='DELETE':
+            trip.delete()
             return Response({
-                'msg':'Error:Must provide a valid id!'
+                'msg': ' Trip Deleted',
             })
 
     @api_view(['POST'])
-    def postTrip(request):
+    def create_trip(request):
+        trip_data = JSONParser().parse(request)
+        trip_srlz = TripSerializer(data=trip_data)
+        if trip_srlz.is_valid():
+            trip_srlz.save()
+            return Response({
+                'msg': 'Trip Created',
+                'data': trip_srlz.data
+            })
+        return Response(trip_srlz.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserTours_API(generics.ListCreateAPIView):
+    '''
+    Users Trips API
+    '''
+    queryset = UserTrips.objects.all()
+    serializer_class = UserTourSerializer
+
+    @api_view(['GET','PUT','DELETE'])
+    def user_tour_id(request,id):
+        user_tour_data = JSONParser().parse(request)
+        if id:
+            if request.method == 'GET':
+                user_tour = UserTrips.objects.all().filter(id=id)
+                user_tour_ser = UserTourSerializer(user_tour,many=True)
+                return Response(user_tour_ser.data)
+            elif request.method == 'PUT':
+                user_tour = UserTrips.objects.get(id=id)
+                user_tour_srlz = UserTourSerializer(user_tour, data=user_tour_data)
+                if user_tour_srlz.is_valid():
+                    user_tour_srlz.save()
+                    return Response({
+                        'msg': 'User Trip Updated!',
+                        'data': user_tour_srlz.data
+                    })
+                return Response(user_tour_srlz.errors, status=status.HTTP_400_BAD_REQUEST)
+            elif request.method == 'DELETE':
+                user_tour = UserTrips.objects.get(id=id)
+                user_tour.delete()
+                return Response({
+                    'msg': ' User Trip Deleted',
+                })
+
+
+    @api_view(['GET','POST'])
+    def user_tours_ops(request):
+        user_tour_data = JSONParser().parse(request)
         if request.method == 'POST':
-            data = JSONParser().parse(request)
-            trip_serializer = TripsSerializers(data=data)
+            user_trip_srlz = UserTourSerializer(data=user_tour_data)
+            if user_trip_srlz.is_valid():
+                user_trip_srlz.save()
+                return Response({
+                    'msg': 'User Trip Created',
+                    'data': user_trip_srlz.data
+                })
+            return Response(user_trip_srlz.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif request.method == 'GET':
+            user_trips = UserTrips.objects.all()
+            user_trips_srlz = UserTourSerializer(user_trips,many=True)
+            return Response(user_trips_srlz.data)
 
-            if trip_serializer.is_valid():
-                trip_item_object = trip_serializer.save()
-                return JsonResponse(trip_serializer.data, status=status.HTTP_201_CREATED)
-
-            return JsonResponse(trip_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return JsonResponse("Bad Request", status=status.HTTP_400_BAD_REQUEST)
-
-    @api_view(['POST'])
-    def postTripDetails(request):
-        if request.method == 'POST':
-            data = JSONParser().parse(request)
-            trip_details_serializer = TripsDetailsSerializer(data=data)
-
-            if trip_details_serializer.is_valid():
-                trip_details_item_object = trip_details_serializer.save()
-                return JsonResponse(trip_details_serializer.data, status=status.HTTP_201_CREATED)
-
-            return JsonResponse(trip_details_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return JsonResponse("Bad Request", status=status.HTTP_400_BAD_REQUEST)'''
 
 @api_view(['GET'])
 def api_root(request, format=None):

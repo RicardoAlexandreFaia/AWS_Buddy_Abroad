@@ -20,11 +20,12 @@ urlpatterns = [
     path('confirmAccount/',Users.confirm_sign_up,name='confirm_sign_up'),
     path('login/',Users.login_auth,name='loginAuth'),
     # Trips Urls
-    path('trips/',Trips_API.as_view(),name='trips'),
-    path('trips/<str:location>',Trips_API.get_location),
+    path('trips/',Trips_API.create_trip),
+    path('trips/<int:id>',Trips_API.update_delete_trip),
+    path('trips/<str:lctn>',Trips_API.get_trip),
     # User Tour Urls
-    path('user_trips/',User_Tour_API.as_view(),name='user_trips'),
-    path('user_trips/<int:id>',User_Tour_API.user_tour_id),
+    path('user_trips/',UserTours_API.user_tours_ops,name='user_trips'),
+    path('user_trips/<int:id>',UserTours_API.user_tour_id),
     path('', views.api_root),
     path('swagger/',schema_view.with_ui('swagger',cache_timeout=0),name="schema-swagger-ui"),
 ]
